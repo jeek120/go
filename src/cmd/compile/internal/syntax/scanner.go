@@ -415,6 +415,8 @@ func (s *scanner) atIdentChar(first bool) bool {
 	return true
 }
 
+// 这是一个hash算法，用第一个字节左移4位和第二个字节进行亦或
+// 然后加上字符长度的低5位，其中uint(len(keywordMap)-1)是二进制的5个1 0x00011111
 // hash is a perfect hash function for keywords.
 // It assumes that s has at least length 2.
 func hash(s []byte) uint {
@@ -427,6 +429,7 @@ func init() {
 	// populate keywordMap
 	for tok := _Break; tok <= _Var; tok++ {
 		h := hash([]byte(tok.String()))
+		// 如果hash冲突后，直接异常退出，因为关键字是固定的，所以可以在初始化的时候进行校验
 		if keywordMap[h] != 0 {
 			panic("imperfect hash")
 		}

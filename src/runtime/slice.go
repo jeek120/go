@@ -90,7 +90,9 @@ func makeslicecopy(et *_type, tolen int, fromlen int, from unsafe.Pointer) unsaf
 }
 
 func makeslice(et *_type, len, cap int) unsafe.Pointer {
+	// 计算内存 mem=元素大小*总容量
 	mem, overflow := math.MulUintptr(et.Size_, uintptr(cap))
+	// 判断最大内存溢出
 	if overflow || mem > maxAlloc || len < 0 || len > cap {
 		// NOTE: Produce a 'len out of range' error instead of a
 		// 'cap out of range' error when someone does make([]T, bignumber).
@@ -104,6 +106,7 @@ func makeslice(et *_type, len, cap int) unsafe.Pointer {
 		panicmakeslicecap()
 	}
 
+	// 申请空间
 	return mallocgc(mem, et, true)
 }
 

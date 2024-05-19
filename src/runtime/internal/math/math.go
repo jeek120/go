@@ -8,6 +8,7 @@ import "internal/goarch"
 
 const MaxUintptr = ^uintptr(0)
 
+// 计算两个数的乘积，并返回结果是否超过了一个int的最大值
 // MulUintptr returns a * b and whether the multiplication overflowed.
 // On supported platforms this is an intrinsic lowered by the compiler.
 func MulUintptr(a, b uintptr) (uintptr, bool) {

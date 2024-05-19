@@ -54,6 +54,7 @@ func main() {
 		os.Exit(2)
 	}
 
+	// 这个小写的gc是go compile，go编译器哦
 	gc.Main(archInit)
 	base.Exit(0)
 }

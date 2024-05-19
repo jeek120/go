@@ -56,6 +56,7 @@ func LoadPackage(filenames []string) {
 				}
 				defer f.Close()
 
+				// 挨个解析源码
 				p.file, _ = syntax.Parse(fbase, f, p.error, p.pragma, syntax.CheckBranches) // errors are tracked via p.error
 			}()
 		}

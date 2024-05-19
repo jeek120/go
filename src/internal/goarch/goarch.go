@@ -28,6 +28,8 @@ const (
 	WASM
 )
 
+// 这是一个巧妙的设计，其中(^uintptr(0) >> 63)这个如果是1，代表的是64位操作系统，如果32位，就是0
+// 然后4再左移一位或者0位，就变成了8字节或者4字节
 // PtrSize is the size of a pointer in bytes - unsafe.Sizeof(uintptr(0)) but as an ideal constant.
 // It is also the size of the machine's native word size (that is, 4 on 32-bit systems, 8 on 64-bit).
 const PtrSize = 4 << (^uintptr(0) >> 63)

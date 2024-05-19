@@ -61,6 +61,7 @@ func Main(archInit func(*ssagen.ArchInfo)) {
 
 	defer handlePanic()
 
+	// 初始化cpu架构
 	archInit(&ssagen.Arch)
 
 	base.Ctxt = obj.Linknew(ssagen.Arch.LinkArch)
@@ -74,7 +75,9 @@ func Main(archInit func(*ssagen.ArchInfo)) {
 	// See bugs 31188 and 21945 (CLs 170638, 98075, 72371).
 	base.Ctxt.UseBASEntries = base.Ctxt.Headtype != objabi.Hdarwin
 
+	// 解析SSA设置
 	base.DebugSSA = ssa.PhaseOption
+	// 解析Cmd设置
 	base.ParseFlags()
 
 	if os.Getenv("GOGC") == "" { // GOGC set disables starting heap adjustment
@@ -178,6 +181,7 @@ func Main(archInit func(*ssagen.ArchInfo)) {
 	ir.EscFmt = escape.Fmt
 	ir.IsIntrinsicCall = ssagen.IsIntrinsicCall
 	inline.SSADumpInline = ssagen.DumpInline
+	// SSA环境变量初始化
 	ssagen.InitEnv()
 	ssagen.InitTables()
 
@@ -194,6 +198,7 @@ func Main(archInit func(*ssagen.ArchInfo)) {
 	rttype.Init()
 
 	// Parse and typecheck input.
+	// 源码解析
 	noder.LoadPackage(flag.Args())
 
 	// As a convenience to users (toolchain maintainers, in particular),

@@ -80,6 +80,7 @@ type int int
 // distinct type, however, and not an alias for, say, uint32.
 type uint uint
 
+// uintptr是一个整数类型，它有足够的空间去存储任何指针
 // uintptr is an integer type that is large enough to hold the bit pattern of
 // any pointer.
 type uintptr uintptr

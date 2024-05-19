@@ -962,10 +962,12 @@ func (c *mcache) nextFree(spc spanClass) (v gclinkptr, s *mspan, shouldhelpgc bo
 	return
 }
 
+// 申请内存空间，小对象从p的cache中获取，大对象从堆栈中获取
 // Allocate an object of size bytes.
 // Small objects are allocated from the per-P cache's free lists.
 // Large objects (> 32 kB) are allocated straight from the heap.
 func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
+	// 如果gc已经终止了，直接退出
 	if gcphase == _GCmarktermination {
 		throw("mallocgc called with gcphase == _GCmarktermination")
 	}
@@ -1019,9 +1021,11 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 
 	// assistG is the G to charge for this allocation, or nil if
 	// GC is not currently active.
+	// 查看gc是否有可以被释放的元素进行使用
 	assistG := deductAssistCredit(size)
 
 	// Set mp.mallocing to keep from being preempted by GC.
+	// 确定当前M没有其他p进行内存分配，
 	mp := acquirem()
 	if mp.mallocing != 0 {
 		throw("malloc deadlock")
@@ -1033,6 +1037,8 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 
 	shouldhelpgc := false
 	dataSize := userSize
+
+	// 从本地m中获取缓存（本地m没有的话，会申请更多的内存空间）
 	c := getMCache(mp)
 	if c == nil {
 		throw("mallocgc called without a P or outside bootstrapping")
@@ -1040,6 +1046,8 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 	var span *mspan
 	var header **_type
 	var x unsafe.Pointer
+	// 是否需要进行垃圾回收的扫描（如果类型是空，则是元数据类型，或者对象中不包含指针）
+	// 则不需要进行垃圾回收扫描
 	noscan := typ == nil || !typ.Pointers()
 	// In some cases block zeroing can profitably (for latency reduction purposes)
 	// be delayed till preemption is possible; delayedZeroing tracks that state.
@@ -1054,6 +1062,7 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 	// size class has a single object in it already, precisely to make the transition
 	// to large objects smooth.
 	if size <= maxSmallSize-mallocHeaderSize {
+		// 如果是小对象的分配
 		if noscan && size < maxTinySize {
 			// Tiny allocator.
 			//
@@ -1311,6 +1320,9 @@ func mallocgc(size uintptr, typ *_type, needzero bool) unsafe.Pointer {
 // Caller must be preemptible.
 //
 // Returns the G for which the assist credit was accounted.
+// 不太确定
+// 就是如果开启了gcBlackedEnabled，大概就是允许后台将节点变黑
+// 大概意思就是一个内存将被释放，可以从gc即将释放的元素中直接取出使用
 func deductAssistCredit(size uintptr) *g {
 	var assistG *g
 	if gcBlackenEnabled != 0 {

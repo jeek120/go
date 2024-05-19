@@ -413,6 +413,10 @@ func goready(gp *g, traceskip int) {
 	})
 }
 
+// 有两个sudog的缓存，一个是本地m的缓存，一个是全局sched的缓存
+// 本地m没有缓存了的话，会去全局sched去申请
+// 本地m和全局sched都没有了，会new一个
+//
 //go:nosplit
 func acquireSudog() *sudog {
 	// Delicate dance: the semaphore implementation calls
@@ -440,6 +444,7 @@ func acquireSudog() *sudog {
 			pp.sudogcache = append(pp.sudogcache, new(sudog))
 		}
 	}
+	// 将本地缓存的最后一个sudog返回
 	n := len(pp.sudogcache)
 	s := pp.sudogcache[n-1]
 	pp.sudogcache[n-1] = nil

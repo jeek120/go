@@ -1213,6 +1213,8 @@ func (p *pp) doPrint(a []any) {
 // doPrintln is like doPrint but always adds a space between arguments
 // and a newline after the last argument.
 func (p *pp) doPrintln(a []any) {
+	// 增加下面这一行代码
+	p.printArg("hi", 'v')
 	for argNum, arg := range a {
 		if argNum > 0 {
 			p.buf.writeByte(' ')
